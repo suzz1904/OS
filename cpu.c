@@ -130,6 +130,43 @@ struct PCB handle_process_completion_rr(struct PCB ready_queue[QUEUEMAX], int *q
     }
 
     struct PCB next_process = ready_queue[0];
+
+    // Remove the first process from the queue
+    for (int i = 0; i < (*queue_cnt) - 1; i++) {
+        ready_queue[i] = ready_queue[i + 1];
+    }
+    (*queue_cnt)--;
+
+    int burst_time_to_use = (next_process.remaining_bursttime < time_quantum) ? next_process.remaining_bursttime : time_quantum;
+    next_process.execution_starttime = timestamp;
+    next_process.execution_endtime = timestamp + burst_time_to_use;
+    next_process.remaining_bursttime -= burst_time_to_use;
+
+    if (next_process.remaining_bursttime > 0) {
+        if (*queue_cnt < QUEUEMAX) {
+            ready_queue[*queue_cnt] = next_process;
+            (*queue_cnt)++;
+        } else {
+            printf("Warning: Ready queue is full. Process not added back.\n");
+        }
+    } else {
+        next_process.completion_time = next_process.execution_endtime;
+        next_process.turnaround_time = next_process.completion_time - next_process.arrival_time;
+        next_process.waiting_time = next_process.turnaround_time - next_process.bursttime;
+
+
+    }
+
+    return next_process;
+}
+
+/*
+struct PCB handle_process_completion_rr(struct PCB ready_queue[QUEUEMAX], int *queue_cnt, int timestamp, int time_quantum) {
+    if (*queue_cnt == 0) {
+        return NULLPCB;
+    }
+
+    struct PCB next_process = ready_queue[0];
     
     // Remove the first process from the queue
     for (int i = 0; i < (*queue_cnt) - 1; i++) {
@@ -151,7 +188,7 @@ struct PCB handle_process_completion_rr(struct PCB ready_queue[QUEUEMAX], int *q
 
     return next_process;
 }
-
+*/
 
 struct PCB handle_process_completion_srtp(struct PCB ready_queue[QUEUEMAX], int *queue_cnt, int timestamp ) {
 	if (*queue_cnt ==0) {
