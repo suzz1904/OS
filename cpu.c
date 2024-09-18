@@ -3,7 +3,7 @@
 
 #define NULLPCB (struct PCB) {0, 0, 0, 0, 0, 0, 0}
 
-
+/*
 struct PCB handle_process_arrival_pp(struct PCB ready_queue[QUEUEMAX], int *queue_cnt, struct PCB current_process, struct PCB new_process, int timestamp) {
     if (current_process.process_id == 0) {
         // No process is currently running
@@ -38,7 +38,48 @@ struct PCB handle_process_arrival_pp(struct PCB ready_queue[QUEUEMAX], int *queu
 
     return current_process;
 }
+*/
 
+void insert_into_ready_queue_pp(struct PCB ready_queue[], int *queue_size, struct PCB new_process) {
+    int i = *queue_size - 1;
+    
+    // Move processes back if they have a lower priority than the new process
+    while (i >= 0 && ready_queue[i].process_priority > new_process.process_priority) {
+        ready_queue[i + 1] = ready_queue[i];
+        i--;
+    }
+
+    // Insert the new process into the correct position
+    ready_queue[i + 1] = new_process;
+    (*queue_size)++;
+}
+
+// Function to handle the arrival of a process in Priority-based Preemptive Scheduling (PP)
+struct PCB handle_process_arrival_pp(struct PCB ready_queue[], int *queue_size, struct PCB current_process, struct PCB new_process, int timestamp) {
+    // If there is no current process running
+    if (current_process.process_id == 0) {
+        // Start executing the new process immediately
+        new_process.execution_starttime = timestamp;
+        new_process.remaining_bursttime = new_process.total_bursttime;
+        return new_process;
+    }
+    
+    // If the new process has a higher priority (lower value), preempt the current process
+    if (new_process.process_priority < current_process.process_priority) {
+        // Add the current process back to the ready queue
+        current_process.remaining_bursttime -= (timestamp - current_process.execution_starttime);
+        insert_into_ready_queue_pp(ready_queue, queue_size, current_process);
+        
+        // Start the new process immediately
+        new_process.execution_starttime = timestamp;
+        new_process.remaining_bursttime = new_process.total_bursttime;
+        return new_process;
+    } else {
+        // Add the new process to the ready queue since it doesn't preempt the current process
+        insert_into_ready_queue_pp(ready_queue, queue_size, new_process);
+        return current_process;
+    }
+}
 
 struct PCB handle_process_arrival_srtp(struct PCB ready_queue[QUEUEMAX], int *queue_cnt, struct PCB current_process, struct PCB new_process, int timestamp) {
     // If no current process is running
@@ -242,7 +283,6 @@ struct PCB handle_process_completion_pp(struct PCB ready_queue[QUEUEMAX], int *q
 
     return next_process;
 }
-
 /*
 int main() {
     struct PCB ready_queue[10];
@@ -251,19 +291,20 @@ int main() {
     // Example processes
     struct PCB current_process = NULLPCB;
     int timestamp = 0;
+	struct PCB process1 = {1, 1, 4, 1, 5, 4, 8}; // Process 1 [PID:1, AT:1, TBT:4, EST:1, EET:5, RBT:4, Priority:8]
+	struct PCB process2 = {2, 2, 3, 0, 0, 3, 6};    // Process 2 [PID:2, AT:2, TBT:3, EST:0, EET:0, RBT:3, Priority:6]
     struct PCB process1 = {1, 0, 10, 0, 0, 10, 2};  // Process 1, Priority 1
     struct PCB process2 = {2, 2, 5, 0, 0, 5, 1};   // Process 2, Priority 2
     struct PCB process3 = {3, 3, 7, 0, 0, 7, 3};   // Process 3, Priority 0 (highest priority)
-
     // Simulate arrival of processes
     current_process = handle_process_arrival_pp(ready_queue, &queue_size, current_process, process1, timestamp);
     printf("Current Process ID: %d\n", current_process.process_id);
 
-    timestamp += 2;
+    timestamp += 1;
     current_process = handle_process_arrival_pp(ready_queue, &queue_size, current_process, process2, timestamp);
     printf("Current Process ID: %d\n", current_process.process_id);
 
-    timestamp += 1;
+    timestamp += 2;
     current_process = handle_process_arrival_pp(ready_queue, &queue_size, current_process, process3, timestamp);
     printf("Current Process ID: %d\n", current_process.process_id);
 
