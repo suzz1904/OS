@@ -3,7 +3,7 @@
 
 #define NULLPCB (struct PCB) {0, 0, 0, 0, 0, 0, 0}
 
-
+/*
 // Function declarations (implement these functions based on your scheduling policies)
 struct PCB handle_process_arrival_pp(struct PCB ready_queue[], int *queue_size, struct PCB current_process, struct PCB new_process, int timestamp);
 struct PCB handle_process_arrival_srtp(struct PCB ready_queue[], int *queue_size, struct PCB current_process, struct PCB new_process, int timestamp);
@@ -11,7 +11,7 @@ struct PCB handle_process_arrival_rr(struct PCB ready_queue[], int *queue_size, 
 struct PCB handle_process_completion_pp(struct PCB ready_queue[], int *queue_size, int timestamp);
 struct PCB handle_process_completion_srtp(struct PCB ready_queue[], int *queue_size, int timestamp);
 struct PCB handle_process_completion_rr(struct PCB ready_queue[], int *queue_size, int timestamp, int time_quantum);
-
+*/
 
 
 struct PCB handle_process_arrival_pp(struct PCB ready_queue[QUEUEMAX], int *queue_cnt, struct PCB current_process, struct PCB new_process, int timestamp) {
@@ -83,7 +83,7 @@ struct PCB handle_process_completion_pp(struct PCB ready_queue[QUEUEMAX], int *q
 
     return next_process;
 }
-
+/*
 int main() {
     struct PCB ready_queue[10];
     int queue_size = 0;
@@ -115,4 +115,4 @@ int main() {
     return 0;
 }
 
-
+*/
