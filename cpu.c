@@ -126,7 +126,9 @@ struct PCB handle_process_arrival_rr(struct PCB ready_queue[QUEUEMAX], int *queu
 }
 struct PCB handle_process_completion_rr(struct PCB ready_queue[QUEUEMAX], int *queue_cnt, int timestamp, int time_quantum) {
     if (*queue_cnt == 0) {
-        return NULLPCB;
+        // Return a null PCB or handle empty queue case
+        struct PCB nullpcb = {0};
+        return nullpcb;
     }
 
     struct PCB next_process = ready_queue[0];
@@ -137,29 +139,29 @@ struct PCB handle_process_completion_rr(struct PCB ready_queue[QUEUEMAX], int *q
     }
     (*queue_cnt)--;
 
+    // Determine execution end time based on remaining burst time and time quantum
     int burst_time_to_use = (next_process.remaining_bursttime < time_quantum) ? next_process.remaining_bursttime : time_quantum;
     next_process.execution_starttime = timestamp;
     next_process.execution_endtime = timestamp + burst_time_to_use;
     next_process.remaining_bursttime -= burst_time_to_use;
 
+    // If there is remaining burst time, the process should go back to the ready queue
     if (next_process.remaining_bursttime > 0) {
         if (*queue_cnt < QUEUEMAX) {
             ready_queue[*queue_cnt] = next_process;
             (*queue_cnt)++;
         } else {
-            printf("Warning: Ready queue is full. Process not added back.\n");
+            // Handle queue overflow
+            printf("Warning: Ready queue is full. Process %d not added back.\n", next_process.process_id);
         }
     } else {
-        next_process.completion_time = next_process.execution_endtime;
-        next_process.turnaround_time = next_process.completion_time - next_process.arrival_time;
-        next_process.waiting_time = next_process.turnaround_time - next_process.bursttime;
-
-
+        // Process has completed
+        printf("Process %d completed at time %d\n", next_process.process_id, next_process.execution_endtime);
+        printf("Total Burst Time: %d, Arrival Time: %d\n", next_process.total_bursttime, next_process.arrival_timestamp);
     }
 
     return next_process;
 }
-
 /*
 struct PCB handle_process_completion_rr(struct PCB ready_queue[QUEUEMAX], int *queue_cnt, int timestamp, int time_quantum) {
     if (*queue_cnt == 0) {
