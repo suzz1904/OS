@@ -15,8 +15,10 @@ struct PCB handle_process_arrival_pp(struct PCB ready_queue[QUEUEMAX], int *queu
 
     // If the new process has a higher priority (lower priority value)
     if (new_process.process_priority < current_process.process_priority) {
-	current_process.execution_endtime = 0;
-        ready_queue[*queue_cnt] = current_process;
+        current_process.remaining_bursttime -= (timestamp - current_process.execution_starttime);
+        current_process.execution_starttime = 0;
+        current_process.execution_endtime = 0;  
+	ready_queue[*queue_cnt] = current_process;
         (*queue_cnt)++;
 
         new_process.execution_starttime = timestamp;
@@ -58,9 +60,7 @@ struct PCB handle_process_arrival_srtp(struct PCB ready_queue[QUEUEMAX], int *qu
 	}
 	else {
 	
-        current_process.execution_starttime = 0;
         current_process.remaining_bursttime -= (timestamp - current_process.execution_starttime);
-        current_process.execution_endtime = 0;  
 
         
         ready_queue[*queue_cnt] = current_process;
@@ -163,10 +163,15 @@ struct PCB handle_process_completion_rr(struct PCB ready_queue[QUEUEMAX], int *q
 
     next_process.execution_starttime = timestamp;
 
-    if (next_process.remaining_bursttime < time_quantum) {
+    if (next_process.remaining_bursttime <= time_quantum) {
         next_process.execution_endtime = timestamp + next_process.remaining_bursttime;
+	next_process.remaining_bursttime = 0;
     } else {
         next_process.execution_endtime = timestamp + time_quantum;
+	next_process.remaining_bursttime -= time_quantum;
+
+        ready_queue[*queue_cnt] = next_process;
+        (*queue_cnt)++;
     }
 
     return next_process;
