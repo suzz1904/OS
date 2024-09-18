@@ -40,46 +40,44 @@ struct PCB handle_process_arrival_pp(struct PCB ready_queue[QUEUEMAX], int *queu
 }
 */
 
-void insert_into_ready_queue_pp(struct PCB ready_queue[], int *queue_size, struct PCB new_process) {
-    int i = *queue_size - 1;
-    
-    // Move processes back if they have a lower priority than the new process
-    while (i >= 0 && ready_queue[i].process_priority > new_process.process_priority) {
-        ready_queue[i + 1] = ready_queue[i];
-        i--;
-    }
-
-    // Insert the new process into the correct position
-    ready_queue[i + 1] = new_process;
-    (*queue_size)++;
-}
-
-// Function to handle the arrival of a process in Priority-based Preemptive Scheduling (PP)
-struct PCB handle_process_arrival_pp(struct PCB ready_queue[], int *queue_size, struct PCB current_process, struct PCB new_process, int timestamp) {
-    // If there is no current process running
+struct PCB handle_process_arrival_pp(struct PCB ready_queue[QUEUEMAX], int *queue_cnt, struct PCB current_process, struct PCB new_process, int timestamp) {
+    // If no current process is running
     if (current_process.process_id == 0) {
-        // Start executing the new process immediately
         new_process.execution_starttime = timestamp;
+        new_process.execution_endtime = timestamp + new_process.total_bursttime;
         new_process.remaining_bursttime = new_process.total_bursttime;
         return new_process;
     }
-    
-    // If the new process has a higher priority (lower value), preempt the current process
+
+    // If the new process has a higher priority (lower priority value)
     if (new_process.process_priority < current_process.process_priority) {
-        // Add the current process back to the ready queue
-        current_process.remaining_bursttime -= (timestamp - current_process.execution_starttime);
-        insert_into_ready_queue_pp(ready_queue, queue_size, current_process);
-        
-        // Start the new process immediately
+        // Update current process before moving to ready_queue
+        current_process.execution_endtime = timestamp;  // Update current process end time
+        current_process.remaining_bursttime -= (timestamp - current_process.execution_starttime);  // Update remaining burst time
+
+        ready_queue[*queue_cnt] = current_process;  // Add current process to ready queue
+        (*queue_cnt)++;  // Increment the ready queue count
+
+        // Set the new process as the current process
         new_process.execution_starttime = timestamp;
+        new_process.execution_endtime = timestamp + new_process.total_bursttime;
         new_process.remaining_bursttime = new_process.total_bursttime;
+
         return new_process;
-    } else {
-        // Add the new process to the ready queue since it doesn't preempt the current process
-        insert_into_ready_queue_pp(ready_queue, queue_size, new_process);
-        return current_process;
     }
+
+    // Otherwise, add the new process to the ready queue
+    new_process.execution_starttime = 0;
+    new_process.execution_endtime = 0;
+    new_process.remaining_bursttime = new_process.total_bursttime;
+
+    ready_queue[*queue_cnt] = new_process;
+    (*queue_cnt)++;
+
+    return current_process;
 }
+
+
 
 struct PCB handle_process_arrival_srtp(struct PCB ready_queue[QUEUEMAX], int *queue_cnt, struct PCB current_process, struct PCB new_process, int timestamp) {
     // If no current process is running
