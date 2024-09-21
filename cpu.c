@@ -51,31 +51,35 @@ struct PCB handle_process_arrival_pp(struct PCB ready_queue[QUEUEMAX], int *queu
 
     // If the new process has a higher priority (lower priority value)
     if (new_process.process_priority < current_process.process_priority) {
-        // Update current process before moving to ready_queue
-        current_process.execution_endtime = timestamp;  // Update current process end time
+        // Update the current process before preemption
+        current_process.execution_endtime = 0;  // The current process is not finishing yet
         current_process.remaining_bursttime -= (timestamp - current_process.execution_starttime);  // Update remaining burst time
+        current_process.execution_starttime = 0; // Reset start time since it's preempted
 
-        ready_queue[*queue_cnt] = current_process;  // Add current process to ready queue
+        // Add current process to the ready queue
+        ready_queue[*queue_cnt] = current_process;  
         (*queue_cnt)++;  // Increment the ready queue count
 
         // Set the new process as the current process
         new_process.execution_starttime = timestamp;
-        new_process.execution_endtime = timestamp + new_process.total_bursttime;
-        new_process.remaining_bursttime = new_process.total_bursttime;
+        new_process.execution_endtime = timestamp + new_process.remaining_bursttime;
+        new_process.remaining_bursttime = new_process.total_bursttime;  // Initialize the remaining burst time
 
-        return new_process;
+        return new_process;  // Return the new process as it takes over
     }
 
-    // Otherwise, add the new process to the ready queue
-    new_process.execution_starttime = 0;
-    new_process.execution_endtime = 0;
-    new_process.remaining_bursttime = new_process.total_bursttime;
+    // If the new process does not have higher priority, add it to the ready queue
+    new_process.execution_starttime = 0;  // Not started yet
+    new_process.execution_endtime = 0;    // No end time yet
+    new_process.remaining_bursttime = new_process.total_bursttime;  // Initialize its remaining burst time
 
+    // Add new process to the ready queue
     ready_queue[*queue_cnt] = new_process;
-    (*queue_cnt)++;
+    (*queue_cnt)++;  // Increment the ready queue count
 
-    return current_process;
+    return current_process;  // Return the current process as it continues executing
 }
+
 
 
 
@@ -166,41 +170,35 @@ struct PCB handle_process_arrival_rr(struct PCB ready_queue[QUEUEMAX], int *queu
 struct PCB handle_process_completion_rr(struct PCB ready_queue[QUEUEMAX], int *queue_cnt, int timestamp, int time_quantum) {
     if (*queue_cnt == 0) {
         // Return a null PCB or handle empty queue case
-        struct PCB nullpcb = {0};
-        return nullpcb;
+        return NULLPCB;
     }
 
+    // Get the first process from the queue (Round Robin)
     struct PCB next_process = ready_queue[0];
 
-    // Remove the first process from the queue
+    // Remove the first process from the ready queue
     for (int i = 0; i < (*queue_cnt) - 1; i++) {
         ready_queue[i] = ready_queue[i + 1];
     }
     (*queue_cnt)--;
 
-    // Determine execution end time based on remaining burst time and time quantum
+    // Calculate burst time to execute based on remaining burst time and time quantum
     int burst_time_to_use = (next_process.remaining_bursttime < time_quantum) ? next_process.remaining_bursttime : time_quantum;
     next_process.execution_starttime = timestamp;
     next_process.execution_endtime = timestamp + burst_time_to_use;
     next_process.remaining_bursttime -= burst_time_to_use;
 
-    // If there is remaining burst time, the process should go back to the ready queue
+    // If there is remaining burst time, add the process back to the ready queue
     if (next_process.remaining_bursttime > 0) {
         if (*queue_cnt < QUEUEMAX) {
-            ready_queue[*queue_cnt] = next_process;
+            ready_queue[*queue_cnt] = next_process;  // Add process back to the end of the queue
             (*queue_cnt)++;
-        } else {
-            // Handle queue overflow
-            printf("Warning: Ready queue is full. Process %d not added back.\n", next_process.process_id);
         }
-    } else {
-        // Process has completed
-        printf("Process %d completed at time %d\n", next_process.process_id, next_process.execution_endtime);
-        printf("Total Burst Time: %d, Arrival Time: %d\n", next_process.total_bursttime, next_process.arrival_timestamp);
     }
 
-    return next_process;
+    return next_process;  // Return the next process, whether it's going back to the queue or finished
 }
+
 /*
 struct PCB handle_process_completion_rr(struct PCB ready_queue[QUEUEMAX], int *queue_cnt, int timestamp, int time_quantum) {
     if (*queue_cnt == 0) {
@@ -281,7 +279,6 @@ struct PCB handle_process_completion_pp(struct PCB ready_queue[QUEUEMAX], int *q
 
     return next_process;
 }
-/*
 int main() {
     struct PCB ready_queue[10];
     int queue_size = 0;
@@ -289,8 +286,8 @@ int main() {
     // Example processes
     struct PCB current_process = NULLPCB;
     int timestamp = 0;
-	struct PCB process1 = {1, 1, 4, 1, 5, 4, 8}; // Process 1 [PID:1, AT:1, TBT:4, EST:1, EET:5, RBT:4, Priority:8]
-	struct PCB process2 = {2, 2, 3, 0, 0, 3, 6};    // Process 2 [PID:2, AT:2, TBT:3, EST:0, EET:0, RBT:3, Priority:6]
+//	struct PCB process1 = {1, 1, 4, 1, 5, 4, 8}; // Process 1 [PID:1, AT:1, TBT:4, EST:1, EET:5, RBT:4, Priority:8]
+//	struct PCB process2 = {2, 2, 3, 0, 0, 3, 6};    // Process 2 [PID:2, AT:2, TBT:3, EST:0, EET:0, RBT:3, Priority:6]
     struct PCB process1 = {1, 0, 10, 0, 0, 10, 2};  // Process 1, Priority 1
     struct PCB process2 = {2, 2, 5, 0, 0, 5, 1};   // Process 2, Priority 2
     struct PCB process3 = {3, 3, 7, 0, 0, 7, 3};   // Process 3, Priority 0 (highest priority)
@@ -313,4 +310,3 @@ int main() {
 
     return 0;
 }
-*/
