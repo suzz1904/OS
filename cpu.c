@@ -279,34 +279,34 @@ struct PCB handle_process_completion_pp(struct PCB ready_queue[QUEUEMAX], int *q
 
     return next_process;
 }
-int main() {
-    struct PCB ready_queue[10];
-    int queue_size = 0;
+// int main() {
+//     struct PCB ready_queue[10];
+//     int queue_size = 0;
 
-    // Example processes
-    struct PCB current_process = NULLPCB;
-    int timestamp = 0;
-//	struct PCB process1 = {1, 1, 4, 1, 5, 4, 8}; // Process 1 [PID:1, AT:1, TBT:4, EST:1, EET:5, RBT:4, Priority:8]
-//	struct PCB process2 = {2, 2, 3, 0, 0, 3, 6};    // Process 2 [PID:2, AT:2, TBT:3, EST:0, EET:0, RBT:3, Priority:6]
-    struct PCB process1 = {1, 0, 10, 0, 0, 10, 2};  // Process 1, Priority 1
-    struct PCB process2 = {2, 2, 5, 0, 0, 5, 1};   // Process 2, Priority 2
-    struct PCB process3 = {3, 3, 7, 0, 0, 7, 3};   // Process 3, Priority 0 (highest priority)
-    // Simulate arrival of processes
-    current_process = handle_process_arrival_pp(ready_queue, &queue_size, current_process, process1, timestamp);
-    printf("Current Process ID: %d\n", current_process.process_id);
+//     // Example processes
+//     struct PCB current_process = NULLPCB;
+//     int timestamp = 0;
+// //	struct PCB process1 = {1, 1, 4, 1, 5, 4, 8}; // Process 1 [PID:1, AT:1, TBT:4, EST:1, EET:5, RBT:4, Priority:8]
+// //	struct PCB process2 = {2, 2, 3, 0, 0, 3, 6};    // Process 2 [PID:2, AT:2, TBT:3, EST:0, EET:0, RBT:3, Priority:6]
+//     struct PCB process1 = {1, 0, 10, 0, 0, 10, 2};  // Process 1, Priority 1
+//     struct PCB process2 = {2, 2, 5, 0, 0, 5, 1};   // Process 2, Priority 2
+//     struct PCB process3 = {3, 3, 7, 0, 0, 7, 3};   // Process 3, Priority 0 (highest priority)
+//     // Simulate arrival of processes
+//     current_process = handle_process_arrival_pp(ready_queue, &queue_size, current_process, process1, timestamp);
+//     printf("Current Process ID: %d\n", current_process.process_id);
 
-    timestamp += 1;
-    current_process = handle_process_arrival_pp(ready_queue, &queue_size, current_process, process2, timestamp);
-    printf("Current Process ID: %d\n", current_process.process_id);
+//     timestamp += 1;
+//     current_process = handle_process_arrival_pp(ready_queue, &queue_size, current_process, process2, timestamp);
+//     printf("Current Process ID: %d\n", current_process.process_id);
 
-    timestamp += 2;
-    current_process = handle_process_arrival_pp(ready_queue, &queue_size, current_process, process3, timestamp);
-    printf("Current Process ID: %d\n", current_process.process_id);
+//     timestamp += 2;
+//     current_process = handle_process_arrival_pp(ready_queue, &queue_size, current_process, process3, timestamp);
+//     printf("Current Process ID: %d\n", current_process.process_id);
 
-    // Simulate process completion
-    timestamp += 3;
-    current_process = handle_process_completion_pp(ready_queue, &queue_size, timestamp);
-    printf("Next Process ID: %d\n", current_process.process_id);
+//     // Simulate process completion
+//     timestamp += 3;
+//     current_process = handle_process_completion_pp(ready_queue, &queue_size, timestamp);
+//     printf("Next Process ID: %d\n", current_process.process_id);
 
-    return 0;
-}
+//     return 0;
+// }
