@@ -167,37 +167,37 @@ struct PCB handle_process_arrival_rr(struct PCB ready_queue[QUEUEMAX], int *queu
         }
     }
 }
-struct PCB handle_process_completion_rr(struct PCB ready_queue[QUEUEMAX], int *queue_cnt, int timestamp, int time_quantum) {
-    if (*queue_cnt == 0) {
-        // Return a null PCB or handle empty queue case
-        return NULLPCB;
-    }
+// struct PCB handle_process_completion_rr(struct PCB ready_queue[QUEUEMAX], int *queue_cnt, int timestamp, int time_quantum) {
+//     if (*queue_cnt == 0) {
+//         // Return a null PCB or handle empty queue case
+//         return NULLPCB;
+//     }
 
-    // Get the first process from the queue (Round Robin)
-    struct PCB next_process = ready_queue[0];
+//     // Get the first process from the queue (Round Robin)
+//     struct PCB next_process = ready_queue[0];
 
-    // Remove the first process from the ready queue
-    for (int i = 0; i < (*queue_cnt) - 1; i++) {
-        ready_queue[i] = ready_queue[i + 1];
-    }
-    (*queue_cnt)--;
+//     // Remove the first process from the ready queue
+//     for (int i = 0; i < (*queue_cnt) - 1; i++) {
+//         ready_queue[i] = ready_queue[i + 1];
+//     }
+//     (*queue_cnt)--;
 
-    // Calculate burst time to execute based on remaining burst time and time quantum
-    int burst_time_to_use = (next_process.remaining_bursttime < time_quantum) ? next_process.remaining_bursttime : time_quantum;
-    next_process.execution_starttime = timestamp;
-    next_process.execution_endtime = timestamp + burst_time_to_use;
-    next_process.remaining_bursttime -= burst_time_to_use;
+//     // Calculate burst time to execute based on remaining burst time and time quantum
+//     int burst_time_to_use = (next_process.remaining_bursttime < time_quantum) ? next_process.remaining_bursttime : time_quantum;
+//     next_process.execution_starttime = timestamp;
+//     next_process.execution_endtime = timestamp + burst_time_to_use;
+//     next_process.remaining_bursttime -= burst_time_to_use;
 
-    // If there is remaining burst time, add the process back to the ready queue
-    if (next_process.remaining_bursttime > 0) {
-        if (*queue_cnt < QUEUEMAX) {
-            ready_queue[*queue_cnt] = next_process;  // Add process back to the end of the queue
-            (*queue_cnt)++;
-        }
-    }
+//     // If there is remaining burst time, add the process back to the ready queue
+//     if (next_process.remaining_bursttime > 0) {
+//         if (*queue_cnt < QUEUEMAX) {
+//             ready_queue[*queue_cnt] = next_process;  // Add process back to the end of the queue
+//             (*queue_cnt)++;
+//         }
+//     }
 
-    return next_process;  // Return the next process, whether it's going back to the queue or finished
-}
+//     return next_process;  // Return the next process, whether it's going back to the queue or finished
+// }
 
 /*
 struct PCB handle_process_completion_rr(struct PCB ready_queue[QUEUEMAX], int *queue_cnt, int timestamp, int time_quantum) {
