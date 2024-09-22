@@ -50,11 +50,10 @@ struct PCB handle_process_arrival_pp(struct PCB ready_queue[QUEUEMAX], int *queu
     }
 
     // If the new process has a higher priority (lower priority value)
-    if (new_process.process_priority < current_process.process_priority) {
+    if (new_process.process_priority <  current_process.process_priority) {
         // Update the current process before preemption
         current_process.execution_endtime = 0;  // The current process is not finishing yet
         current_process.remaining_bursttime -= (timestamp - current_process.execution_starttime);  // Update remaining burst time
-        current_process.execution_starttime = 0; // Reset start time since it's preempted
 
         // Add current process to the ready queue
         ready_queue[*queue_cnt] = current_process;  
@@ -67,7 +66,7 @@ struct PCB handle_process_arrival_pp(struct PCB ready_queue[QUEUEMAX], int *queu
 
         return new_process;  // Return the new process as it takes over
     }
-
+    else {
     // If the new process does not have higher priority, add it to the ready queue
     new_process.execution_starttime = 0;  // Not started yet
     new_process.execution_endtime = 0;    // No end time yet
@@ -77,7 +76,8 @@ struct PCB handle_process_arrival_pp(struct PCB ready_queue[QUEUEMAX], int *queu
     ready_queue[*queue_cnt] = new_process;
     (*queue_cnt)++;  // Increment the ready queue count
 
-    return current_process;  // Return the current process as it continues executing
+    return current_process;  
+    }// Return the current process as it continues executing
 }
 
 
