@@ -228,6 +228,30 @@ struct PCB handle_process_completion_rr(struct PCB ready_queue[QUEUEMAX], int *q
     return next_process;
 }
 */
+struct PCB handle_process_completion_rr(struct PCB ready_queue[QUEUEMAX], int *queue_cnt, int timestamp, int time_quantum ) {
+	if (*queue_cnt ==0) {
+		return NULLPCB;
+	}
+	// Find the shortest remaining burst time process in the ready queue
+	int earliest_arrival_time = 0;
+	for(int i =1; i < *queue_cnt; i++) {
+		if (ready_queue[i].arrival_timestamp < ready_queue[earliest_arrival_time].arrival_timestamp) {
+			earliest_arrival_time = i;
+		}
+	}
+	
+	struct PCB next_process = ready_queue[earliest_arrival_time];
+
+	for(int i = earliest_arrival_time; i < (*queue_cnt) -1; i++) {
+		ready_queue[i] = ready_queue[i+1];
+	}
+	(*queue_cnt)--;
+
+	next_process.execution_starttime = timestamp;
+	next_process.execution_endtime = timestamp + (time_quantum < next_process.remaining_bursttime) ? time_quantum : next_process.remaining_bursttime;
+
+	return next_process;
+}
 
 struct PCB handle_process_completion_srtp(struct PCB ready_queue[QUEUEMAX], int *queue_cnt, int timestamp ) {
 	if (*queue_cnt ==0) {
