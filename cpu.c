@@ -232,6 +232,8 @@ struct PCB handle_process_completion_rr(struct PCB ready_queue[QUEUEMAX], int *q
 	if (*queue_cnt ==0) {
 		return NULLPCB;
 	}
+
+    else {
 	// Find the shortest remaining burst time process in the ready queue
 	int earliest_arrival_time = 0;
 	for(int i =1; i < *queue_cnt; i++) {
@@ -247,10 +249,17 @@ struct PCB handle_process_completion_rr(struct PCB ready_queue[QUEUEMAX], int *q
 	}
 	(*queue_cnt)--;
 
+    if (time_quantum < = next_process.remaining_bursttime) {
+        int sum_time = time_quantum;
+    }
+    else {
+        int sum_time = next_process.remaining_bursttime;
+    }
 	next_process.execution_starttime = timestamp;
-	next_process.execution_endtime = timestamp + (time_quantum < next_process.remaining_bursttime) ? time_quantum : next_process.remaining_bursttime;
+	next_process.execution_endtime = timestamp + sum_time;
 
 	return next_process;
+    }
 }
 
 struct PCB handle_process_completion_srtp(struct PCB ready_queue[QUEUEMAX], int *queue_cnt, int timestamp ) {
