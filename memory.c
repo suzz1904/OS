@@ -5,7 +5,7 @@
 #define NULLBLOCK (struct MEMORY_BLOCK){0, 0, 0, 0}
 
 struct MEMORY_BLOCK best_fit_allocate(int request_size, struct MEMORY_BLOCK memory_map[MAPMAX], int *map_cnt, int process_id) {
-    int best_index = -1; block
+    int best_index = -1; 
     int best_size_diff = __INT_MAX__; 
 
     for (int i = 0; i < *map_cnt; i++) {
