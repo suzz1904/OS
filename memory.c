@@ -45,7 +45,40 @@ struct MEMORY_BLOCK best_fit_allocate(int request_size, struct MEMORY_BLOCK memo
     return allocated_block;
 }
 
-struct MEMORY_BLOCK first_fit_allocate(int request_size, struct MEMORY_BLOCK memory_map[MAPMAX],int *map_cnt, int process_id){}
+struct MEMORY_BLOCK first_fit_allocate(int request_size, struct MEMORY_BLOCK memory_map[MAPMAX],int *map_cnt, int process_id) {
+    
+    for (int i = 0; i < *map_cnt; i++) {
+        if (memory_map[i].process_id == 0 && memory_map[i].segment_size >= request_size) {
+
+            if (memory_map[i].segment_size == request_size) {
+                memory_map[i].process_id = process_id;
+                return memory_map[i];
+            }
+
+            struct MEMORY_BLOCK allocated_block = memory_map[i];   
+            allocated_block.end_address = allocated_block.start_address + request_size - 1; 
+            allocated_block.segment_size = request_size;
+            allocated_block.process_id = process_id;
+
+            memory_map[i].start_address = allocated_block.end_address + 1;
+            memory_map[i].segment_size -= request_size;
+
+            for (int j = *map_cnt; j > i; j--) {
+                memory_map[j] = memory_map[j - 1];
+            }
+            memory_map[i] = allocated_block;
+            (*map_cnt)++;
+
+            return allocated_block;
+
+        }
+
+        else 
+            return NULLBLOCK;
+    }
+
+    
+}
 struct MEMORY_BLOCK worst_fit_allocate(int request_size, struct MEMORY_BLOCK memory_map[MAPMAX],int *map_cnt, int process_id){}
 struct MEMORY_BLOCK next_fit_allocate(int request_size, struct MEMORY_BLOCK memory_map[MAPMAX],int *map_cnt, int process_id, int last_address){}
 
