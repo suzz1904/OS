@@ -80,15 +80,13 @@ struct MEMORY_BLOCK first_fit_allocate(int request_size, struct MEMORY_BLOCK mem
 }
 struct MEMORY_BLOCK worst_fit_allocate(int request_size, struct MEMORY_BLOCK memory_map[MAPMAX],int *map_cnt, int process_id) {
     int worst_index = -1; 
-    int worst_size_diff = __INT_MAX__; 
+    int largest_block_size = 0; 
 
     for (int i = 0; i < *map_cnt; i++) {
         if (memory_map[i].process_id == 0 && memory_map[i].segment_size >= request_size) {
-            int size_diff = memory_map[i].segment_size - request_size;
-
-            if (size_diff > worst_size_diff) {
+        if (memory_map[i].segment_size > largest_block_size) {
+                largest_block_size = memory_map[i].segment_size;
                 worst_index = i;
-                worst_size_diff = size_diff;
             }
         }
     }
