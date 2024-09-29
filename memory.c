@@ -116,6 +116,54 @@ struct MEMORY_BLOCK worst_fit_allocate(int request_size, struct MEMORY_BLOCK mem
 
     return allocated_block;
 }
-struct MEMORY_BLOCK next_fit_allocate(int request_size, struct MEMORY_BLOCK memory_map[MAPMAX],int *map_cnt, int process_id, int last_address){}
+struct MEMORY_BLOCK next_fit_allocate(int request_size, struct MEMORY_BLOCK memory_map[MAPMAX],int *map_cnt, int process_id, int last_address){
+
+    int start_index = -1;
+    
+    for (int i = 0; i < *map_cnt; i++) {
+        if (memory_map[i].start_address <= last_address && memory_map[i].end_address >= last_address) {
+            start_index = i;
+            break;
+        }
+    }
+
+    int i = start_index + 1; 
+    while (i != start_index) {
+        if (i == *map_cnt) {
+            i = 0; 
+        }
+
+        if (memory_map[i].process_id == 0 && memory_map[i].segment_size >= request_size) {
+            struct MEMORY_BLOCK allocated_block = memory_map[i];
+            
+            if (allocated_block.segment_size == request_size) {
+                memory_map[i].process_id = process_id;
+                return allocated_block;
+            }
+
+            allocated_block.end_address = allocated_block.start_address + request_size - 1;
+            allocated_block.segment_size = request_size;
+            allocated_block.process_id = process_id;
+
+            memory_map[i].start_address = allocated_block.end_address + 1;
+            memory_map[i].segment_size -= request_size;
+
+            for (int j = *map_cnt; j > i; j--) {
+                memory_map[j] = memory_map[j - 1];
+            }
+            memory_map[i] = allocated_block;
+            (*map_cnt)++; 
+
+            return allocated_block;
+        }
+
+        i++; 
+        if (i == *map_cnt) {
+            i = 0; 
+        }
+    }
+
+    return NULLBLOCK;
+}
 
 void release_memory(struct MEMORY_BLOCK freed_block, struct MEMORY_BLOCK memory_map[MAPMAX],int *map_cnt){}
