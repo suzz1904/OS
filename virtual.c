@@ -61,7 +61,9 @@ int process_page_access_fifo(struct PTE page_table[TABLEMAX],int *table_cnt, int
 
     return -1; 
         }
+    return -1; 
         }
+    return -1; 
 }
 int count_page_faults_fifo(struct PTE page_table[TABLEMAX],int table_cnt, int refrence_string[REFERENCEMAX],int reference_cnt,int frame_pool[POOLMAX],int frame_cnt) {}
 
