@@ -133,30 +133,30 @@ int count_page_faults_lfu(struct PTE page_table[TABLEMAX],int table_cnt, int ref
 
 
 
-int main() {
-    struct PTE page_table[TABLEMAX] = {
-        {false, -1, -1, -1, -1},
-        {false, -1, -1, -1, -1},
-        {true, 10, 3, 3, 1},
-        {false, -1, -1, -1, -1},
-        {false, -1, -1, -1, -1},
-        {true, 20, 2, 4, 2},
-        {false, -1, -1, -1, -1},
-        {true, 30, 1, 1, 1}
-    };
+// int main() {
+//     struct PTE page_table[TABLEMAX] = {
+//         {false, -1, -1, -1, -1},
+//         {false, -1, -1, -1, -1},
+//         {true, 10, 3, 3, 1},
+//         {false, -1, -1, -1, -1},
+//         {false, -1, -1, -1, -1},
+//         {true, 20, 2, 4, 2},
+//         {false, -1, -1, -1, -1},
+//         {true, 30, 1, 1, 1}
+//     };
 
-    int table_cnt = 8;
-    int reference_string[] = {2, 5, 0, 7, 4, 2, 3, 5, 1, 2, 6, 0};
-    int reference_cnt = 12;
-    int frame_pool[POOLMAX] = {}; // Empty frame pool
-    int frame_cnt = 0;
+//     int table_cnt = 8;
+//     int reference_string[] = {2, 5, 0, 7, 4, 2, 3, 5, 1, 2, 6, 0};
+//     int reference_cnt = 12;
+//     int frame_pool[POOLMAX] = {}; // Empty frame pool
+//     int frame_cnt = 0;
 
-    int faults = count_page_faults_fifo(page_table, table_cnt, reference_string, reference_cnt, frame_pool, frame_cnt);
+//     int faults = count_page_faults_fifo(page_table, table_cnt, reference_string, reference_cnt, frame_pool, frame_cnt);
 
-    printf("Page faults: %d\n", faults);
+//     printf("Page faults: %d\n", faults);
 
-    return 0;
-}
+//     return 0;
+// }
 
 // int main() {
 //     // Initialize a page table and frame pool for testing
