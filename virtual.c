@@ -125,7 +125,7 @@ int process_page_access_lfu(struct PTE page_table[TABLEMAX],int *table_cnt, int 
     }
 
     // No free frames, need to replace a page
-    int small_ref = -1;
+    int small_ref = INT_MAX;
     int lfu_page = -1;
 
     for (int i = 0; i < *table_cnt; i++) {
