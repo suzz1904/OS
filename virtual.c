@@ -168,15 +168,67 @@ int count_page_faults_fifo(struct PTE page_table[TABLEMAX], int table_cnt,
 }
 
 
+int count_page_faults_lru(struct PTE page_table[TABLEMAX],int table_cnt, int reference_string[REFERENCEMAX],int reference_cnt,int frame_pool[POOLMAX],int frame_cnt) {
+    int page_faults = 0;       // To track the number of page faults
+    int current_time = 1;      // Start the simulated time at 1
 
+    for (int i = 0; i < reference_cnt; i++) {
+        // Increment the timestamp at the start of processing a new page access
+        current_time++;  
 
+        int page_number = reference_string[i];  // Current page to be referenced
 
-int count_page_faults_lru(struct PTE page_table[TABLEMAX],int table_cnt, int refrence_string[REFERENCEMAX],int reference_cnt,int frame_pool[POOLMAX],int frame_cnt) {}
+        if (page_table[page_number].is_valid) {
+            // Page is already in memory (valid), just update the last access timestamp
+            page_table[page_number].last_access_timestamp = current_time;
+            page_table[page_number].reference_count++;  // Increment the reference count
+        } else {
+            // Page fault occurs
+            page_faults++;
+
+            // If free frames are available, allocate one from the frame pool
+            if (frame_cnt > 0) {
+                int frame = frame_pool[--frame_cnt];  // Get a frame from the pool
+                page_table[page_number].frame_number = frame;
+                page_table[page_number].is_valid = 1;
+                page_table[page_number].arrival_timestamp = current_time;  // Set the arrival time
+                page_table[page_number].last_access_timestamp = current_time; // Set the last access time
+                page_table[page_number].reference_count = 1;  // Set reference count
+            } else {
+                // No free frames available, need to replace a page using FIFO
+                int lru_page = -1;
+                int lru_time = current_time + 1;  // Any valid time will be smaller
+
+                // Find the page with the lru arrival timestamp (FIFO replacement)
+                for (int j = 0; j < table_cnt; j++) {
+                    if (page_table[j].is_valid && page_table[j].last_access_timestamp < lru_time) {
+                        lru_page = j;
+                        lru_time = page_table[j].last_access_timestamp;
+                    }
+                }
+
+                // Replace the lru page
+                page_table[lru_page].is_valid = 0;  // Invalidate the lru page
+                int freed_frame = page_table[lru_page].frame_number;  // Get its frame
+                page_table[lru_page].frame_number = -1;  // Reset frame number
+
+                // Load the new page into the freed frame
+                page_table[page_number].frame_number = freed_frame;
+                page_table[page_number].is_valid = 1;
+                page_table[page_number].arrival_timestamp = current_time;  // Set the arrival time
+                page_table[page_number].last_access_timestamp = current_time; // Set the last access time
+                page_table[page_number].reference_count = 1;  // Reset reference count
+            }
+        }
+    }
+
+    return page_faults;
+}
 
 
 
 int process_page_access_lfu(struct PTE page_table[TABLEMAX],int *table_cnt, int page_number, int frame_pool[POOLMAX],int *frame_cnt, int current_timestamp) {}
-int count_page_faults_lfu(struct PTE page_table[TABLEMAX],int table_cnt, int refrence_string[REFERENCEMAX],int reference_cnt,int frame_pool[POOLMAX],int frame_cnt) {}
+int count_page_faults_lfu(struct PTE page_table[TABLEMAX],int table_cnt, int reference_string[REFERENCEMAX],int reference_cnt,int frame_pool[POOLMAX],int frame_cnt) {}
 
 
 
