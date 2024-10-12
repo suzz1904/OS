@@ -107,6 +107,52 @@ int process_page_access_lru(struct PTE page_table[TABLEMAX],int *table_cnt, int 
     return frame;
 }
 
+int process_page_access_lfu(struct PTE page_table[TABLEMAX],int *table_cnt, int page_number, int frame_pool[POOLMAX],int *frame_cnt, int current_timestamp) {
+    if (page_table[page_number].is_valid) {
+        page_table[page_number].last_access_timestamp = current_timestamp;
+        page_table[page_number].reference_count++;
+        return page_table[page_number].frame_number;
+    }
+
+    if (*frame_cnt > 0) {
+        int frame = frame_pool[--(*frame_cnt)];
+        page_table[page_number].is_valid = 1;
+        page_table[page_number].frame_number = frame;
+        page_table[page_number].arrival_timestamp = current_timestamp;
+        page_table[page_number].last_access_timestamp = current_timestamp;
+        page_table[page_number].reference_count = 1;
+        return frame;
+    }
+
+    // No free frames, need to replace a page
+    int small_ref = -1;
+    int lfu_page = -1;
+
+    for (int i = 0; i < *table_cnt; i++) {
+        if (page_table[i].is_valid && page_table[i].reference_count < small_ref) {
+            small_ref = page_table[i].reference_count;
+            lfu_page = i;
+        }
+    }
+    
+    // Mark the lru as invalid
+    page_table[lfu_page].is_valid = 0;
+    int frame = page_table[lfu_page].frame_number;
+    page_table[lfu_page].frame_number = -1;
+    page_table[lfu_page].arrival_timestamp = -1;
+    page_table[lfu_page].last_access_timestamp = -1;
+    page_table[lfu_page].reference_count = -1;
+
+    // Set the new page
+    page_table[page_number].is_valid = 1;
+    page_table[page_number].frame_number = frame;
+    page_table[page_number].arrival_timestamp = current_timestamp;
+    page_table[page_number].last_access_timestamp = current_timestamp;
+    page_table[page_number].reference_count = 1;
+
+    return frame;
+}
+
 
 int count_page_faults_fifo(struct PTE page_table[TABLEMAX], int table_cnt, 
                            int reference_string[REFERENCEMAX], int reference_cnt, 
@@ -227,7 +273,6 @@ int count_page_faults_lru(struct PTE page_table[TABLEMAX],int table_cnt, int ref
 
 
 
-int process_page_access_lfu(struct PTE page_table[TABLEMAX],int *table_cnt, int page_number, int frame_pool[POOLMAX],int *frame_cnt, int current_timestamp) {}
 int count_page_faults_lfu(struct PTE page_table[TABLEMAX],int table_cnt, int reference_string[REFERENCEMAX],int reference_cnt,int frame_pool[POOLMAX],int frame_cnt) {}
 
 
