@@ -126,13 +126,21 @@ int process_page_access_lfu(struct PTE page_table[TABLEMAX],int *table_cnt, int 
 
     // No free frames, need to replace a page
     int small_ref = INT_MAX;
+    int smallest_arrival_time = INT_MAX;
     int lfu_page = -1;
 
     for (int i = 0; i < *table_cnt; i++) {
-        if (page_table[i].is_valid && page_table[i].reference_count < small_ref) {
-            small_ref = page_table[i].reference_count;
-            lfu_page = i;
+        if (page_table[i].is_valid) {
+            // If this page has a smaller reference count, or the same reference count but an earlier arrival timestamp
+            if (page_table[i].reference_count < small_ref || 
+                (page_table[i].reference_count == small_ref && page_table[i].arrival_timestamp < smallest_arrival_time)) {
+                
+                small_ref = page_table[i].reference_count;
+                smallest_arrival_time = page_table[i].arrival_timestamp;
+                lfu_page = i;
         }
+    }
+
     }
     
     // Mark the lru as invalid
