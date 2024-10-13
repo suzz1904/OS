@@ -281,7 +281,74 @@ int count_page_faults_lru(struct PTE page_table[TABLEMAX],int table_cnt, int ref
 
 
 
-int count_page_faults_lfu(struct PTE page_table[TABLEMAX],int table_cnt, int reference_string[REFERENCEMAX],int reference_cnt,int frame_pool[POOLMAX],int frame_cnt) {}
+int count_page_faults_lfu(struct PTE page_table[TABLEMAX],int table_cnt, int reference_string[REFERENCEMAX],int reference_cnt,int frame_pool[POOLMAX],int frame_cnt) {
+
+    int page_faults = 0;       // To track the number of page faults
+    int current_time = 1;      // Start the simulated time at 1
+
+    for (int i = 0; i < reference_cnt; i++) {
+        // Increment the timestamp at the start of processing a new page access
+        current_time++;  
+
+        int page_number = reference_string[i];  // Current page to be referenced
+
+        if (page_table[page_number].is_valid) {
+            // Page is already in memory (valid), just update the last access timestamp
+            page_table[page_number].last_access_timestamp = current_time;
+            page_table[page_number].reference_count++;  // Increment the reference count
+        } else {
+            // Page fault occurs
+            page_faults++;
+
+            // If free frames are available, allocate one from the frame pool
+            if (frame_cnt > 0) {
+                int frame = frame_pool[--frame_cnt];  // Get a frame from the pool
+                page_table[page_number].frame_number = frame;
+                page_table[page_number].is_valid = 1;
+                page_table[page_number].arrival_timestamp = current_time;  // Set the arrival time
+                page_table[page_number].last_access_timestamp = current_time; // Set the last access time
+                page_table[page_number].reference_count = 1;  // Set reference count
+            } else {
+
+                // No free frames, need to replace a page
+                int small_ref = INT_MAX;
+                int smallest_arrival_time = INT_MAX;
+                int lfu_page = -1;
+
+                for (int i = 0; i < table_cnt; i++) {
+                    if (page_table[i].is_valid) {
+                        // If this page has a smaller reference count, or the same reference count but an earlier arrival timestamp
+                        if (page_table[i].reference_count < small_ref || 
+                            (page_table[i].reference_count == small_ref && page_table[i].arrival_timestamp < smallest_arrival_time)) {
+                            
+                            small_ref = page_table[i].reference_count;
+                            smallest_arrival_time = page_table[i].arrival_timestamp;
+                            lfu_page = i;
+                    }
+                }
+
+                }
+
+                // Replace the lfu page
+                page_table[lfu_page].is_valid = 0;  // Invalidate the lru page
+                int freed_frame = page_table[lfu_page].frame_number;  // Get its frame
+                page_table[lfu_page].frame_number = -1;  // Reset frame number
+                page_table[lfu_page].arrival_timestamp =0;
+                page_table[lfu_page].last_access_timestamp = 0;
+                page_table[lfu_page].reference_count =0;
+
+                // Load the new page into the freed frame
+                page_table[page_number].frame_number = freed_frame;
+                page_table[page_number].is_valid = 1;
+                page_table[page_number].arrival_timestamp = current_time;  // Set the arrival time
+                page_table[page_number].last_access_timestamp = current_time; // Set the last access time
+                page_table[page_number].reference_count = 1;  // Reset reference count
+            }
+        }
+    }
+
+    return page_faults;
+}
 
 
 
