@@ -78,7 +78,7 @@ struct RCB handle_request_completion_sstf(struct RCB request_queue[QUEUEMAX],int
         return (struct RCB){0, 0, 0, 0, 0}; // NULLRCB
     }
 
-    // Find the request with the earliest arrival time
+    // Find the closest request with the earliest arrival time
     struct RCB earliest_request = request_queue[0];
     int earliest_index = 0;
     int closest = 999;
@@ -119,5 +119,67 @@ struct RCB handle_request_arrival_look(struct RCB request_queue[QUEUEMAX],int *q
 }
 
 struct RCB handle_request_completion_look(struct RCB request_queue[QUEUEMAX],int  *queue_cnt, int current_cylinder, int scan_direction){
-    
+    if (*queue_cnt == 0) {
+        return (struct RCB){0, 0, 0, 0, 0}; 
+    }
+    struct RCB selected_request;
+    int found = 0;
+    for (int i = 0; i < *queue_cnt; i++) {
+        if (request_queue[i].cylinder == current_cylinder) {
+            if (!found || request_queue[i].arrival_timestamp < selected_request.arrival_timestamp) {
+                selected_request = request_queue[i];
+                found = 1;
+            }
+        }
+    }
+    if (!found) {
+        if (scan_direction == 1) { 
+            for (int i = 0; i < *queue_cnt; i++) {
+                if (request_queue[i].cylinder > current_cylinder) {
+                    if (!found || request_queue[i].cylinder < selected_request.cylinder) {
+                        selected_request = request_queue[i];
+                        found = 1;
+                    }
+                }
+            }
+            if (!found) {
+                for (int i = 0; i < *queue_cnt; i++) {
+                    if (!found || abs(request_queue[i].cylinder - current_cylinder) < abs(selected_request.cylinder - current_cylinder)) {
+                        selected_request = request_queue[i];
+                        found = 1;
+                    }
+                }
+            }
+        } else { 
+            for (int i = 0; i < *queue_cnt; i++) {
+                if (request_queue[i].cylinder < current_cylinder) {
+                    if (!found || request_queue[i].cylinder > selected_request.cylinder) {
+                        selected_request = request_queue[i];
+                        found = 1;
+                    }
+                }
+            }
+
+            if (!found) {
+                for (int i = 0; i < *queue_cnt; i++) {
+
+                    if (!found || abs(request_queue[i].cylinder - current_cylinder) < abs(selected_request.cylinder - current_cylinder)) {
+                        selected_request = request_queue[i];
+                        found = 1;
+                    }
+                }
+            }
+        }
+    }
+    for (int i = 0; i < *queue_cnt; i++) {
+        if (request_queue[i].request_id == selected_request.request_id) {
+            for (int j = i; j < *queue_cnt - 1; j++) {
+                request_queue[j] = request_queue[j + 1]; 
+            }
+            (*queue_cnt)--; 
+            break;
+        }
+    }
+
+    return selected_request; 
 }
