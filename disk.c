@@ -81,7 +81,7 @@ struct RCB handle_request_completion_sstf(struct RCB request_queue[QUEUEMAX],int
     // Find the request with the earliest arrival time
     struct RCB earliest_request = request_queue[0];
     int earliest_index = 0;
-    int closest = INT64_MAX;
+    int closest = 999;
 
     for(int i = 1; i < *queue_cnt; i++) {
         if (abs(request_queue[i].cylinder - current_cylinder) < closest || (abs(request_queue[i].cylinder - current_cylinder) == closest && request_queue[i].arrival_timestamp < earliest_request.arrival_timestamp)) {
