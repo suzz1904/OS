@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include "oslabs.h"
 
-#define QUEUEMAX 100 
 
 struct RCB handle_request_arrival_fcfs(struct RCB request_queue[QUEUEMAX], 
                                         int *queue_cnt, 
@@ -29,7 +28,30 @@ struct RCB handle_request_arrival_fcfs(struct RCB request_queue[QUEUEMAX],
 
 
 
-struct RCB handle_request_completion_fcfs(struct RCB request_queue[QUEUEMAX],int *queue_cnt) {}
+struct RCB handle_request_completion_fcfs(struct RCB request_queue[QUEUEMAX],int *queue_cnt) {
+    if (*queue_cnt == 0) {
+        return (struct RCB){0, 0, 0, 0, 0}; // NULLRCB
+    }
+
+    // Find the request with the earliest arrival time
+    struct RCB earliest_request = request_queue[0];
+    int earliest_index = 0;
+
+    for (int i = 1; i < *queue_cnt; i++) {
+        if (request_queue[i].arrival_timestamp < earliest_request.arrival_timestamp) {
+            earliest_request = request_queue[i];
+            earliest_index = i;
+        }
+    }
+
+    // Remove the earliest request from the queue
+    for (int i = earliest_index; i < *queue_cnt - 1; i++) {
+        request_queue[i] = request_queue[i + 1]; // Shift left
+    }
+    (*queue_cnt)--; // Decrement the count of items in the queue
+
+    return earliest_request;
+}
 
 
 struct RCB handle_request_arrival_sstf(struct RCB request_queue[QUEUEMAX],int *queue_cnt, struct RCB current_request, struct RCB new_request, int timestamp){}
